@@ -6,7 +6,7 @@ const Comments = require("./models/commentModels");
 const Blog = require("./models/blogModeles");
 const Contact = require("./models/contactModel");
 const Login = require("./models/loginModeles");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 app.use(express.json());
 process.env.ACCESS_TOKEN_SECRET = "your-secret-key";
 const verifyAccessToken = require("./auth").verifyAccessToken;

@@ -43,7 +43,7 @@ var Comments = require("./models/commentModels");
 var Blog = require("./models/blogModeles");
 var Contact = require("./models/contactModel");
 var Login = require("./models/loginModeles");
-var bcrypt = require("bcrypt");
+var bcrypt = require("bcryptjs");
 app.use(express.json());
 process.env.ACCESS_TOKEN_SECRET = "your-secret-key";
 var verifyAccessToken = require("./auth").verifyAccessToken;
