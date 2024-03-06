@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha './specs/**/*.spec.js'",
     "serve": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "start": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
