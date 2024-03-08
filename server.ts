@@ -883,6 +883,8 @@ app.put("/Login/:id", AuthenticateToken, async (req, res) => {
  * @swagger
  * /Blog/like/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Like a blog
  *     parameters:
  *       - in: path
@@ -907,7 +909,7 @@ app.put("/Login/:id", AuthenticateToken, async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-app.put("/Blog/like/:id", async (req, res) => {
+app.put("/Blog/like/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { userId } = req.body;

@@ -1079,6 +1079,8 @@ app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(
  * @swagger
  * /Blog/like/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Like a blog
  *     parameters:
  *       - in: path
@@ -1103,7 +1105,7 @@ app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(
  *       '500':
  *         description: Internal server error
  */
-app.put("/Blog/like/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put("/Blog/like/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, userId, blog, updatedBlog, error_21;
     return __generator(this, function (_a) {
         switch (_a.label) {
