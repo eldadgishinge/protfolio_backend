@@ -9,17 +9,7 @@ const Contact = require("./models/contactModel");
 const Login = require("./models/loginModeles");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const cors = require("cors");
-
-// Configure CORS settings
-const corsOptions = {
-  origin: "https://protfolio-backend-1.onrender.com", // Allow any origin for simplicity. Replace with your frontend URL if needed.
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
-
 app.use(express.json());
-app.use(cors(corsOptions));
 
 function AuthenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -47,7 +37,7 @@ const options = {
     },
     servers: [
       {
-        url: "https://localhost:4000/",
+        url: "https://protfolio-backend-1.onrender.com/",
       },
     ],
     components: {
