@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const Joi = require("joi");
 const app = express();
@@ -7,15 +8,24 @@ const Blog = require("./models/blogModeles");
 const Contact = require("./models/contactModel");
 const Login = require("./models/loginModeles");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+
+app.use(cors());
+
 app.use(express.json());
-process.env.ACCESS_TOKEN_SECRET = "your-secret-key";
-const verifyAccessToken = require("./auth").verifyAccessToken;
-const { generateAccessToken } = require("./auth");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyAccessToken,
-} = require("./auth");
+
+function AuthenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
 
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
@@ -25,20 +35,31 @@ require("dotenv").config();
 const options = {
   definition: {
     openapi: "3.0.0",
-    info:{
-      title : "Eldad's portflio Brand for mongoDB",
+    info: {
+      title: "Eldad's portflio Brand for mongoDB",
       version: "1.0.0",
-    }
-    servers : [{
-      url: "http://localhost:4000/",
-    }]
-  }
+    },
+    servers: [
+      {
+        url: "https://localhost:4000/",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+  },
   apis: ["./server.js"],
-}
+};
 
 const swaggerSpec = swaggerJsDoc(options);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Joi schema for blog creation
 const blogSchema = Joi.object({
@@ -104,6 +125,8 @@ app.get("/", (req, res) => {
  * @swagger
  * /Comments:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Create a new comment
  *     requestBody:
  *       required: true
@@ -125,12 +148,12 @@ app.get("/", (req, res) => {
  *         description: Bad request. Invalid input data.
  */
 
-
-app.post("/Comments", async (req, res) => {
+// POST endpoint to create a new comment
+app.post("/Comments", AuthenticateToken, async (req, res) => {
   try {
     const { error } = commentSchema.validate(req.body);
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return res.status(400).json({ message: error.details[0].message });
     }
 
     const { blog_id } = req.body;
@@ -147,6 +170,8 @@ app.post("/Comments", async (req, res) => {
  * @swagger
  * /Comments:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all comments
  *     responses:
  *       '200':
@@ -155,7 +180,7 @@ app.post("/Comments", async (req, res) => {
  *         description: Internal server error
  */
 
-app.get("/Comments", async (req, res) => {
+app.get("/Comments", AuthenticateToken, async (req, res) => {
   try {
     const comments = await Comments.find();
     res.status(200).json({ comments });
@@ -168,6 +193,8 @@ app.get("/Comments", async (req, res) => {
  * @swagger
  * /Comments/{id}:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get a comment by ID
  *     parameters:
  *       - in: path
@@ -181,8 +208,7 @@ app.get("/Comments", async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-
-app.get("/Comments/:id", async (req, res) => {
+app.get("/Comments/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const comments = await Comments.findById(id);
@@ -196,6 +222,8 @@ app.get("/Comments/:id", async (req, res) => {
  * @swagger
  * /Comments/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete a comment by ID
  *     parameters:
  *       - in: path
@@ -209,7 +237,7 @@ app.get("/Comments/:id", async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-app.delete("/Comments/:id", async (req, res) => {
+app.delete("/Comments/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const comments = await Comments.findByIdAndDelete(id);
@@ -224,6 +252,8 @@ app.delete("/Comments/:id", async (req, res) => {
  * @swagger
  * /Blog:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Create a new blog
  *     requestBody:
  *       required: true
@@ -248,19 +278,23 @@ app.delete("/Comments/:id", async (req, res) => {
  *       '500':
  *         description: Internal server error
  */
-app.post("/Blog", validateBlog, async (req, res) => {
+// POST route for creating a new blog
+app.post("/Blog", AuthenticateToken, validateBlog, async (req, res) => {
   try {
-    const blog = await Blog.create(req.body); // Use Comments.create directly
+    const blog = await Blog.create(req.body);
     res.status(200).json({ blog });
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ message: "No blog Server Error" });
+    res.status(500).json({ message: "Server Error" });
   }
 });
+
 /**
  * @swagger
  * /Blog/{id}:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get a blog by ID
  *     parameters:
  *       - in: path
@@ -275,7 +309,7 @@ app.post("/Blog", validateBlog, async (req, res) => {
  *         description: Internal server error
  */
 //find blog by id
-app.get("/Blog/:id", async (req, res) => {
+app.get("/Blog/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const blog = await Blog.findById(id).populate("comments");
@@ -289,6 +323,8 @@ app.get("/Blog/:id", async (req, res) => {
  * @swagger
  * /Blog:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all blogs
  *     responses:
  *       '200':
@@ -297,7 +333,7 @@ app.get("/Blog/:id", async (req, res) => {
  *         description: Internal server error
  */
 //get all blogs
-app.get("/Blog", async (req, res) => {
+app.get("/Blog", AuthenticateToken, async (req, res) => {
   try {
     const blogs = await Blog.find();
     res.status(200).json({ blogs });
@@ -307,11 +343,12 @@ app.get("/Blog", async (req, res) => {
   }
 });
 
-
 /**
  * @swagger
  * /Blog/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update a blog by ID
  *     parameters:
  *       - in: path
@@ -345,7 +382,8 @@ app.get("/Blog", async (req, res) => {
  *         description: Internal server error
  */
 //update blog
-app.put("/Blog/:id", async (req, res) => {
+// Update blog by id
+app.put("/Blog/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const blog = await Blog.findByIdAndUpdate(id, req.body);
@@ -361,10 +399,13 @@ app.put("/Blog/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 /**
  * @swagger
  * /Blog/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete a blog by ID
  *     parameters:
  *       - in: path
@@ -379,10 +420,19 @@ app.put("/Blog/:id", async (req, res) => {
  *         description: Internal server error
  */
 //delete blog
-app.delete("/Blog/:id", async (req, res) => {
+// Delete blog route with authentication
+app.delete("/Blog/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Perform the deletion only if the user is authenticated
     const blog = await Blog.findByIdAndDelete(id);
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ message: `Cannot find any blog with ID ${id}` });
+    }
+
     res.status(200).json(blog);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -673,14 +723,16 @@ app.post("/login", async (req, res) => {
     }
 
     // Generate tokens
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = jwt.sign(
+      user.toJSON(),
+      process.env.ACCESS_TOKEN_SECRET
+    );
 
     // Save refresh token in the database
-    user.refreshToken = refreshToken;
+
     await user.save();
 
-    res.status(200).json({ accessToken, refreshToken });
+    res.status(200).json({ accessToken: accessToken });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -690,6 +742,8 @@ app.post("/login", async (req, res) => {
  * @swagger
  * /Login:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all users
  *     responses:
  *       '200':
@@ -698,7 +752,7 @@ app.post("/login", async (req, res) => {
  *         description: Internal server error
  */
 //get all users
-app.get("/Login", async (req, res) => {
+app.get("/Login", AuthenticateToken, async (req, res) => {
   try {
     const users = await Login.find().select("-user_password");
     res.status(200).json({ users });
@@ -711,6 +765,8 @@ app.get("/Login", async (req, res) => {
  * @swagger
  * /Login/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete a user by ID
  *     parameters:
  *       - in: path
@@ -725,7 +781,7 @@ app.get("/Login", async (req, res) => {
  *         description: Internal server error
  */
 //delete user by id
-app.delete("/Login/:id", async (req, res) => {
+app.delete("/Login/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const user = await Login.findByIdAndDelete(id);
@@ -768,6 +824,8 @@ app.get("/Login/:id", async (req, res) => {
  * @swagger
  * /Login/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update a user by ID
  *     parameters:
  *       - in: path
@@ -795,7 +853,7 @@ app.get("/Login/:id", async (req, res) => {
  *         description: Internal server error
  */
 // Update user by id
-app.put("/Login/:id", async (req, res) => {
+app.put("/Login/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { user_password } = req.body;

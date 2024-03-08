@@ -35,6 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _this = this;
+require("dotenv").config();
 var express = require("express");
 var Joi = require("joi");
 var app = express();
@@ -44,11 +45,22 @@ var Blog = require("./models/blogModeles");
 var Contact = require("./models/contactModel");
 var Login = require("./models/loginModeles");
 var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
+var cors = require("cors");
+app.use(cors());
 app.use(express.json());
-process.env.ACCESS_TOKEN_SECRET = "your-secret-key";
-var verifyAccessToken = require("./auth").verifyAccessToken;
-var generateAccessToken = require("./auth").generateAccessToken;
-var _a = require("./auth"), generateAccessToken = _a.generateAccessToken, generateRefreshToken = _a.generateRefreshToken, verifyAccessToken = _a.verifyAccessToken;
+function AuthenticateToken(req, res, next) {
+    var authHeader = req.headers["authorization"];
+    var token = authHeader && authHeader.split(" ")[1];
+    if (token == null)
+        return res.sendStatus(401);
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, user) {
+        if (err)
+            return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}
 var swaggerJsDoc = require("swagger-jsdoc");
 var swaggerUi = require("swagger-ui-express");
 require("dotenv").config();
@@ -59,9 +71,20 @@ var options = {
             title: "Eldad's portflio Brand for mongoDB",
             version: "1.0.0",
         },
-        servers: [{
-                url: "http://localhost:4000/",
-            }]
+        servers: [
+            {
+                url: "https://localhost:4000/",
+            },
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
     },
     apis: ["./server.js"],
 };
@@ -123,6 +146,8 @@ app.get("/", function (req, res) {
  * @swagger
  * /Comments:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Create a new comment
  *     requestBody:
  *       required: true
@@ -143,7 +168,8 @@ app.get("/", function (req, res) {
  *       '400':
  *         description: Bad request. Invalid input data.
  */
-app.post("/Comments", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+// POST endpoint to create a new comment
+app.post("/Comments", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var error, blog_id, comment, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -151,7 +177,7 @@ app.post("/Comments", function (req, res) { return __awaiter(_this, void 0, void
                 _a.trys.push([0, 3, , 4]);
                 error = commentSchema.validate(req.body).error;
                 if (error) {
-                    return [2 /*return*/, res.status(400).json({ error: error.details[0].message })];
+                    return [2 /*return*/, res.status(400).json({ message: error.details[0].message })];
                 }
                 blog_id = req.body.blog_id;
                 return [4 /*yield*/, Comments.create(req.body)];
@@ -175,6 +201,8 @@ app.post("/Comments", function (req, res) { return __awaiter(_this, void 0, void
  * @swagger
  * /Comments:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all comments
  *     responses:
  *       '200':
@@ -182,7 +210,7 @@ app.post("/Comments", function (req, res) { return __awaiter(_this, void 0, void
  *       '500':
  *         description: Internal server error
  */
-app.get("/Comments", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Comments", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var comments, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -206,6 +234,8 @@ app.get("/Comments", function (req, res) { return __awaiter(_this, void 0, void 
  * @swagger
  * /Comments/{id}:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get a comment by ID
  *     parameters:
  *       - in: path
@@ -219,7 +249,7 @@ app.get("/Comments", function (req, res) { return __awaiter(_this, void 0, void 
  *       '500':
  *         description: Internal server error
  */
-app.get("/Comments/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Comments/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, comments, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -243,6 +273,8 @@ app.get("/Comments/:id", function (req, res) { return __awaiter(_this, void 0, v
  * @swagger
  * /Comments/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete a comment by ID
  *     parameters:
  *       - in: path
@@ -256,7 +288,7 @@ app.get("/Comments/:id", function (req, res) { return __awaiter(_this, void 0, v
  *       '500':
  *         description: Internal server error
  */
-app.delete("/Comments/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.delete("/Comments/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, comments, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -281,6 +313,8 @@ app.delete("/Comments/:id", function (req, res) { return __awaiter(_this, void 0
  * @swagger
  * /Blog:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Create a new blog
  *     requestBody:
  *       required: true
@@ -305,7 +339,8 @@ app.delete("/Comments/:id", function (req, res) { return __awaiter(_this, void 0
  *       '500':
  *         description: Internal server error
  */
-app.post("/Blog", validateBlog, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+// POST route for creating a new blog
+app.post("/Blog", AuthenticateToken, validateBlog, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var blog, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -319,7 +354,7 @@ app.post("/Blog", validateBlog, function (req, res) { return __awaiter(_this, vo
             case 2:
                 error_5 = _a.sent();
                 console.log(error_5.message);
-                res.status(500).json({ message: "No blog Server Error" });
+                res.status(500).json({ message: "Server Error" });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -329,6 +364,8 @@ app.post("/Blog", validateBlog, function (req, res) { return __awaiter(_this, vo
  * @swagger
  * /Blog/{id}:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get a blog by ID
  *     parameters:
  *       - in: path
@@ -343,7 +380,7 @@ app.post("/Blog", validateBlog, function (req, res) { return __awaiter(_this, vo
  *         description: Internal server error
  */
 //find blog by id
-app.get("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, blog, error_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -367,6 +404,8 @@ app.get("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 
  * @swagger
  * /Blog:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all blogs
  *     responses:
  *       '200':
@@ -375,7 +414,7 @@ app.get("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 
  *         description: Internal server error
  */
 //get all blogs
-app.get("/Blog", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Blog", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var blogs, error_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -399,6 +438,8 @@ app.get("/Blog", function (req, res) { return __awaiter(_this, void 0, void 0, f
  * @swagger
  * /Blog/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update a blog by ID
  *     parameters:
  *       - in: path
@@ -432,7 +473,8 @@ app.get("/Blog", function (req, res) { return __awaiter(_this, void 0, void 0, f
  *         description: Internal server error
  */
 //update blog
-app.put("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+// Update blog by id
+app.put("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, blog, updatedblog, error_8;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -465,6 +507,8 @@ app.put("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 
  * @swagger
  * /Blog/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete a blog by ID
  *     parameters:
  *       - in: path
@@ -479,7 +523,8 @@ app.put("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 
  *         description: Internal server error
  */
 //delete blog
-app.delete("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+// Delete blog route with authentication
+app.delete("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, blog, error_9;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -489,6 +534,11 @@ app.delete("/Blog/:id", function (req, res) { return __awaiter(_this, void 0, vo
                 return [4 /*yield*/, Blog.findByIdAndDelete(id)];
             case 1:
                 blog = _a.sent();
+                if (!blog) {
+                    return [2 /*return*/, res
+                            .status(404)
+                            .json({ message: "Cannot find any blog with ID ".concat(id) })];
+                }
                 res.status(200).json(blog);
                 return [3 /*break*/, 3];
             case 2:
@@ -811,7 +861,7 @@ app.post("/signup", function (req, res) { return __awaiter(_this, void 0, void 0
  */
 // Login Route with Joi validation
 app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var _a, error, value, _b, user_name, user_password, user, passwordMatch, accessToken, refreshToken, error_16;
+    var _a, error, value, _b, user_name, user_password, user, passwordMatch, accessToken, error_16;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -833,14 +883,13 @@ app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0,
                 if (!passwordMatch) {
                     return [2 /*return*/, res.status(400).json({ message: "Invalid credentials" })];
                 }
-                accessToken = generateAccessToken(user._id);
-                refreshToken = generateRefreshToken(user._id);
+                accessToken = jwt.sign(user.toJSON(), process.env.ACCESS_TOKEN_SECRET);
                 // Save refresh token in the database
-                user.refreshToken = refreshToken;
                 return [4 /*yield*/, user.save()];
             case 3:
+                // Save refresh token in the database
                 _c.sent();
-                res.status(200).json({ accessToken: accessToken, refreshToken: refreshToken });
+                res.status(200).json({ accessToken: accessToken });
                 return [3 /*break*/, 5];
             case 4:
                 error_16 = _c.sent();
@@ -855,6 +904,8 @@ app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0,
  * @swagger
  * /Login:
  *   get:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Get all users
  *     responses:
  *       '200':
@@ -863,7 +914,7 @@ app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0,
  *         description: Internal server error
  */
 //get all users
-app.get("/Login", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Login", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var users, error_17;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -887,6 +938,8 @@ app.get("/Login", function (req, res) { return __awaiter(_this, void 0, void 0, 
  * @swagger
  * /Login/{id}:
  *   delete:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Delete a user by ID
  *     parameters:
  *       - in: path
@@ -901,7 +954,7 @@ app.get("/Login", function (req, res) { return __awaiter(_this, void 0, void 0, 
  *         description: Internal server error
  */
 //delete user by id
-app.delete("/Login/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.delete("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, user, error_18;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -963,6 +1016,8 @@ app.get("/Login/:id", function (req, res) { return __awaiter(_this, void 0, void
  * @swagger
  * /Login/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Update a user by ID
  *     parameters:
  *       - in: path
@@ -990,7 +1045,7 @@ app.get("/Login/:id", function (req, res) { return __awaiter(_this, void 0, void
  *         description: Internal server error
  */
 // Update user by id
-app.put("/Login/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     var id, user_password, hashedPassword, user, error_20;
     return __generator(this, function (_a) {
         switch (_a.label) {
