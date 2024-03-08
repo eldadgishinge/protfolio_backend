@@ -11,9 +11,15 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 
-app.use(cors());
+// Configure CORS settings
+const corsOptions = {
+  origin: "https://protfolio-backend-1.onrender.com", // Allow any origin for simplicity. Replace with your frontend URL if needed.
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
 app.use(express.json());
+app.use(cors(corsOptions));
 
 function AuthenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
