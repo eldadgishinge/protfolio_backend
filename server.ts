@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const Joi = require("joi");
 const app = express();
+const cors = require("cors");
 const mongoose = require("mongoose");
 const Comments = require("./models/commentModels");
 const Blog = require("./models/blogModeles");
@@ -10,6 +11,7 @@ const Login = require("./models/loginModeles");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 app.use(express.json());
+app.use(cors());
 
 function AuthenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -885,44 +887,57 @@ app.put("/Login/:id", AuthenticateToken, async (req, res) => {
  *   put:
  *     security:
  *       - bearerAuth: []
- *     summary: Like a blog
+ *     summary: Like or Unlike a blog
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *       - in: body
- *         name: userId
- *         description: User ID
+ *         description: ID of the blog to like or unlike
+ *       - in: header
+ *         name: Authorization
+ *         description: JWT token obtained after user authentication
  *         required: true
  *         schema:
- *           type: object
- *           properties:
- *             userId:
- *               type: string
+ *           type: string
  *     responses:
  *       '200':
- *         description: Blog liked successfully
+ *         description: Blog liked/unliked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Blog'
  *       '400':
- *         description: User has already liked this blog or invalid input data.
+ *         description: User has already liked/unliked this blog or invalid input data.
  *       '500':
  *         description: Internal server error
+ *
+ *     tags:
+ *       - Blog
  */
 app.put("/Blog/like/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const userId = req.user._id; // Get the user ID from the JWT token
 
     // Check if the user has already liked the blog
     const blog = await Blog.findById(id);
     if (blog.likedBy.includes(userId)) {
-      return res
-        .status(400)
-        .json({ message: "You have already liked this blog" });
+      // Remove the user from the likedBy array and decrement the likes count
+      const updatedBlog = await Blog.findByIdAndUpdate(
+        id,
+        {
+          $pull: { likedBy: userId },
+          $inc: { likes: -1 }, // Decrement the likes count
+        },
+        { new: true }
+      );
+
+      return res.status(200).json(updatedBlog);
     }
 
-    // Update the like count and push the user id to likedBy array
+    // If the user has not liked the blog, like it
     const updatedBlog = await Blog.findByIdAndUpdate(
       id,
       {

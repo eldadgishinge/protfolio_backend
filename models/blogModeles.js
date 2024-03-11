@@ -1,29 +1,40 @@
+var _this = this;
 var mongoose = require("mongoose");
-var blogsSchema = new mongoose.Schema({
-    blog_name: {
+var Schema = mongoose.Schema;
+var blogSchema = new Schema({
+    title: {
         type: String,
-        required: [true, "Please enter the blog name"],
+        required: [true, "Please enter the blog title"],
     },
-    blog_image: {
+    image: {
         type: String,
         required: [true, "Please enter the image URL"],
     },
-    blog_description: {
+    description: {
         type: String,
         required: [true, "Please enter the description"],
     },
-    blog_content: {
+    content: {
         type: String,
         required: [true, "Please enter the content"],
     },
     comments: [
         {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Comment",
         },
     ],
+    likedBy: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Login",
+        },
+    ],
+    totalLikes: {
+        type: Number,
+        default: function () { return _this.likedBy.length; },
+    },
 }, {
     timestamps: true,
 });
-var Blog = mongoose.model("Blog", blogsSchema);
-module.exports = Blog;
+module.exports = mongoose.model("Blog", blogSchema);

@@ -39,6 +39,7 @@ require("dotenv").config();
 var express = require("express");
 var Joi = require("joi");
 var app = express();
+var cors = require("cors");
 var mongoose = require("mongoose");
 var Comments = require("./models/commentModels");
 var Blog = require("./models/blogModeles");
@@ -47,6 +48,7 @@ var Login = require("./models/loginModeles");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 app.use(express.json());
+app.use(cors());
 function AuthenticateToken(req, res, next) {
     var authHeader = req.headers["authorization"];
     var token = authHeader && authHeader.split(" ")[1];
@@ -1081,60 +1083,68 @@ app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(
  *   put:
  *     security:
  *       - bearerAuth: []
- *     summary: Like a blog
+ *     summary: Like or Unlike a blog
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *       - in: body
- *         name: userId
- *         description: User ID
+ *         description: ID of the blog to like or unlike
+ *       - in: header
+ *         name: Authorization
+ *         description: JWT token obtained after user authentication
  *         required: true
  *         schema:
- *           type: object
- *           properties:
- *             userId:
- *               type: string
+ *           type: string
  *     responses:
  *       '200':
- *         description: Blog liked successfully
+ *         description: Blog liked/unliked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Blog'
  *       '400':
- *         description: User has already liked this blog or invalid input data.
+ *         description: User has already liked/unliked this blog or invalid input data.
  *       '500':
  *         description: Internal server error
+ *
+ *     tags:
+ *       - Blog
  */
 app.put("/Blog/like/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
-    var id, userId, blog, updatedBlog, error_21;
+    var id, userId, blog, updatedBlog_1, updatedBlog, error_21;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 3, , 4]);
+                _a.trys.push([0, 5, , 6]);
                 id = req.params.id;
-                userId = req.body.userId;
+                userId = req.user._id;
                 return [4 /*yield*/, Blog.findById(id)];
             case 1:
                 blog = _a.sent();
-                if (blog.likedBy.includes(userId)) {
-                    return [2 /*return*/, res
-                            .status(400)
-                            .json({ message: "You have already liked this blog" })];
-                }
+                if (!blog.likedBy.includes(userId)) return [3 /*break*/, 3];
                 return [4 /*yield*/, Blog.findByIdAndUpdate(id, {
-                        $inc: { likes: 1 },
-                        $push: { likedBy: userId },
+                        $pull: { likedBy: userId },
+                        $inc: { likes: -1 }, // Decrement the likes count
                     }, { new: true })];
             case 2:
+                updatedBlog_1 = _a.sent();
+                return [2 /*return*/, res.status(200).json(updatedBlog_1)];
+            case 3: return [4 /*yield*/, Blog.findByIdAndUpdate(id, {
+                    $inc: { likes: 1 },
+                    $push: { likedBy: userId },
+                }, { new: true })];
+            case 4:
                 updatedBlog = _a.sent();
                 res.status(200).json(updatedBlog);
-                return [3 /*break*/, 4];
-            case 3:
+                return [3 /*break*/, 6];
+            case 5:
                 error_21 = _a.sent();
                 console.log(error_21.message);
                 res.status(500).json({ message: "Internal server error" });
-                return [3 /*break*/, 4];
-            case 4: return [2 /*return*/];
+                return [3 /*break*/, 6];
+            case 6: return [2 /*return*/];
         }
     });
 }); });

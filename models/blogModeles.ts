@@ -1,34 +1,44 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const blogsSchema = new mongoose.Schema(
+const blogSchema = new Schema(
   {
-    blog_name: {
+    title: {
       type: String,
-      required: [true, "Please enter the blog name"],
+      required: [true, "Please enter the blog title"],
     },
-    blog_image: {
+    image: {
       type: String,
       required: [true, "Please enter the image URL"],
     },
-    blog_description: {
+    description: {
       type: String,
       required: [true, "Please enter the description"],
     },
-    blog_content: {
+    content: {
       type: String,
       required: [true, "Please enter the content"],
     },
     comments: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Comment",
       },
     ],
+    likedBy: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Login",
+      },
+    ],
+    totalLikes: {
+      type: Number,
+      default: () => this.likedBy.length,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Blog = mongoose.model("Blog", blogsSchema);
-module.exports = Blog;
+module.exports = mongoose.model("Blog", blogSchema);
