@@ -3,19 +3,19 @@ const Schema = mongoose.Schema;
 
 const blogSchema = new Schema(
   {
-    title: {
+    blog_name: {
       type: String,
       required: [true, "Please enter the blog title"],
     },
-    image: {
+    blog_image: {
       type: String,
       required: [true, "Please enter the image URL"],
     },
-    description: {
+    blog_description: {
       type: String,
       required: [true, "Please enter the description"],
     },
-    content: {
+    blog_content: {
       type: String,
       required: [true, "Please enter the content"],
     },
@@ -31,14 +31,14 @@ const blogSchema = new Schema(
         ref: "Login",
       },
     ],
-    totalLikes: {
-      type: Number,
-      default: () => this.likedBy.length,
-    },
   },
   {
     timestamps: true,
   }
 );
+
+blogSchema.virtual("totalLikes").get(function () {
+  return this.populated("likedBy") ? this.likedBy.length : 0;
+});
 
 module.exports = mongoose.model("Blog", blogSchema);
