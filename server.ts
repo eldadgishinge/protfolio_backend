@@ -886,6 +886,8 @@ app.put("/Login/:id", AuthenticateToken, async (req, res) => {
  * @swagger
  * /Blog/like/{id}:
  *   put:
+ *     security:
+ *       - bearerAuth: []
  *     summary: Like or Unlike a Blog Post
  *     description: Like or Unlike a blog post by providing the post ID.
  *     parameters:
