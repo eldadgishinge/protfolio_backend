@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,11 +35,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.app = void 0;
 require("dotenv").config();
 var express = require("express");
 var Joi = require("joi");
 var app = express();
+exports.app = app;
 var cors = require("cors");
 var mongoose = require("mongoose");
 var Comments = require("./models/commentModels");
@@ -169,7 +172,7 @@ app.get("/", function (req, res) {
  *         description: Bad request. Invalid input data.
  */
 // POST endpoint to create a new comment
-app.post("/Comments", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.post("/Comments", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var error, blog_id, comment, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -210,7 +213,7 @@ app.post("/Comments", AuthenticateToken, function (req, res) { return __awaiter(
  *       '500':
  *         description: Internal server error
  */
-app.get("/Comments", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Comments", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var comments, error_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -249,7 +252,7 @@ app.get("/Comments", AuthenticateToken, function (req, res) { return __awaiter(_
  *       '500':
  *         description: Internal server error
  */
-app.get("/Comments/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Comments/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, comments, error_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -288,7 +291,7 @@ app.get("/Comments/:id", AuthenticateToken, function (req, res) { return __await
  *       '500':
  *         description: Internal server error
  */
-app.delete("/Comments/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.delete("/Comments/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, comments, error_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -340,7 +343,7 @@ app.delete("/Comments/:id", AuthenticateToken, function (req, res) { return __aw
  *         description: Internal server error
  */
 // POST route for creating a new blog
-app.post("/Blog", AuthenticateToken, validateBlog, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.post("/Blog", AuthenticateToken, validateBlog, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var blog, error_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -380,7 +383,7 @@ app.post("/Blog", AuthenticateToken, validateBlog, function (req, res) { return 
  *         description: Internal server error
  */
 //find blog by id
-app.get("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, blog, error_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -414,7 +417,7 @@ app.get("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_
  *         description: Internal server error
  */
 //get all blogs
-app.get("/Blog", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Blog", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var blogs, error_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -474,7 +477,7 @@ app.get("/Blog", AuthenticateToken, function (req, res) { return __awaiter(_this
  */
 //update blog
 // Update blog by id
-app.put("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, blog, updatedblog, error_8;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -524,7 +527,7 @@ app.put("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_
  */
 //delete blog
 // Delete blog route with authentication
-app.delete("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.delete("/Blog/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, blog, error_9;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -576,7 +579,7 @@ app.delete("/Blog/:id", AuthenticateToken, function (req, res) { return __awaite
  *       '500':
  *         description: Internal server error
  */
-app.post("/Contact", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.post("/Contact", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, error, value, contact, error_10;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -635,7 +638,7 @@ app.post("/Contact", function (req, res) { return __awaiter(_this, void 0, void 
  *         description: Internal server error
  */
 // edit contact
-app.put("/Contact/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put("/Contact/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, contact, updatedcontact, error_11;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -676,7 +679,7 @@ app.put("/Contact/:id", function (req, res) { return __awaiter(_this, void 0, vo
  *         description: Internal server error
  */
 // get all contacts
-app.get("/Contact", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Contact", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var contacts, error_12;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -714,7 +717,7 @@ app.get("/Contact", function (req, res) { return __awaiter(_this, void 0, void 0
  *         description: Internal server error
  */
 //find contact by id
-app.get("/Contact/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Contact/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, contact, error_13;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -752,7 +755,7 @@ app.get("/Contact/:id", function (req, res) { return __awaiter(_this, void 0, vo
  *         description: Internal server error
  */
 //delete contact
-app.delete("/Contact/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.delete("/Contact/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, contact, error_14;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -798,7 +801,7 @@ app.delete("/Contact/:id", function (req, res) { return __awaiter(_this, void 0,
  *       '500':
  *         description: Internal server error
  */
-app.post("/signup", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.post("/signup", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, error, value, _b, user_name, user_password, existingUser, hashedPassword, newUser, error_15;
     return __generator(this, function (_c) {
         switch (_c.label) {
@@ -860,7 +863,7 @@ app.post("/signup", function (req, res) { return __awaiter(_this, void 0, void 0
  *         description: Internal server error
  */
 // Login Route with Joi validation
-app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.post("/login", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var _a, error, value, _b, user_name, user_password, user, passwordMatch, accessToken, error_16;
     return __generator(this, function (_c) {
         switch (_c.label) {
@@ -914,7 +917,7 @@ app.post("/login", function (req, res) { return __awaiter(_this, void 0, void 0,
  *         description: Internal server error
  */
 //get all users
-app.get("/Login", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Login", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var users, error_17;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -954,7 +957,7 @@ app.get("/Login", AuthenticateToken, function (req, res) { return __awaiter(_thi
  *         description: Internal server error
  */
 //delete user by id
-app.delete("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.delete("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, user, error_18;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -992,7 +995,7 @@ app.delete("/Login/:id", AuthenticateToken, function (req, res) { return __await
  *         description: Internal server error
  */
 //get user by id
-app.get("/Login/:id", function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.get("/Login/:id", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, user, error_19;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -1045,7 +1048,7 @@ app.get("/Login/:id", function (req, res) { return __awaiter(_this, void 0, void
  *         description: Internal server error
  */
 // Update user by id
-app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, user_password, hashedPassword, user, error_20;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -1081,38 +1084,37 @@ app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(
  * @swagger
  * /Blog/like/{id}:
  *   put:
- *     security:
- *       - bearerAuth: []
- *     summary: Like or Unlike a blog
+ *     summary: Like or Unlike a Blog Post
+ *     description: Like or Unlike a blog post by providing the post ID.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the blog to like or unlike
- *       - in: header
- *         name: Authorization
- *         description: JWT token obtained after user authentication
- *         required: true
- *         schema:
- *           type: string
+ *         description: The ID of the blog post to like or unlike.
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       '200':
- *         description: Blog liked/unliked successfully
+ *         description: Successful operation. Returns the updated blog post.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Blog'
- *       '400':
- *         description: User has already liked/unliked this blog or invalid input data.
  *       '500':
- *         description: Internal server error
- *
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *     tags:
  *       - Blog
  */
-app.put("/Blog/like/:id", AuthenticateToken, function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put("/Blog/like/:id", AuthenticateToken, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, userId, blog, updatedBlog_1, updatedBlog, error_21;
     return __generator(this, function (_a) {
         switch (_a.label) {

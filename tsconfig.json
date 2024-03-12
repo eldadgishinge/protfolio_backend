@@ -1,7 +1,15 @@
 {
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
-    "types": ["node", "mocha", "chai", "supertest", "express", "mongoose"],
+    "types": [
+      "node",
+      "jest",
+      "mocha",
+      "chai",
+      "supertest",
+      "express",
+      "mongoose"
+    ],
     /* Projects */
     // "incremental": true,                              /* Save .tsbuildinfo files to allow for incremental compilation of projects. */
     // "composite": true,                                /* Enable constraints that allow a TypeScript project to be used with project references. */

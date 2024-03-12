@@ -10,6 +10,7 @@ const Contact = require("./models/contactModel");
 const Login = require("./models/loginModeles");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
 app.use(express.json());
 app.use(cors());
 
@@ -885,37 +886,37 @@ app.put("/Login/:id", AuthenticateToken, async (req, res) => {
  * @swagger
  * /Blog/like/{id}:
  *   put:
- *     security:
- *       - bearerAuth: []
- *     summary: Like or Unlike a blog
+ *     summary: Like or Unlike a Blog Post
+ *     description: Like or Unlike a blog post by providing the post ID.
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: ID of the blog to like or unlike
- *       - in: header
- *         name: Authorization
- *         description: JWT token obtained after user authentication
- *         required: true
- *         schema:
- *           type: string
+ *         description: The ID of the blog post to like or unlike.
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       '200':
- *         description: Blog liked/unliked successfully
+ *         description: Successful operation. Returns the updated blog post.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Blog'
- *       '400':
- *         description: User has already liked/unliked this blog or invalid input data.
  *       '500':
- *         description: Internal server error
- *
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *     tags:
  *       - Blog
  */
+
 app.put("/Blog/like/:id", AuthenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -964,3 +965,5 @@ mongoose
   .connect("mongodb+srv://admin:Papamama213@mybrandeldad.lzhxbzt.mongodb.net/")
   .then(() => console.log("Connected!"))
   .catch((err) => console.error("Connection error:", err));
+
+export { app };
