@@ -897,8 +897,6 @@ app.put("/Login/:id", AuthenticateToken, async (req, res) => {
  *         schema:
  *           type: string
  *         description: The ID of the blog post to like or unlike.
- *     security:
- *       - BearerAuth: []
  *     responses:
  *       '200':
  *         description: Successful operation. Returns the updated blog post.

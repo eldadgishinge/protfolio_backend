@@ -1095,8 +1095,6 @@ app.put("/Login/:id", AuthenticateToken, function (req, res) { return __awaiter(
  *         schema:
  *           type: string
  *         description: The ID of the blog post to like or unlike.
- *     security:
- *       - BearerAuth: []
  *     responses:
  *       '200':
  *         description: Successful operation. Returns the updated blog post.
